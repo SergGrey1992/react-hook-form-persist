@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "target": "ES2022", "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext", "moduleResolution": "Bundler", "jsx": "react-jsx",
+    "strict": true, "noUncheckedIndexedAccess": true, "exactOptionalPropertyTypes": true,
+    "noUnusedLocals": true, "noUnusedParameters": true, "verbatimModuleSyntax": true,
+    "skipLibCheck": true, "esModuleInterop": true, "noEmit": true,
+    "types": ["vitest/globals", "node"]
+  },
+  "include": ["src", "tests", "*.config.ts"]
+}
