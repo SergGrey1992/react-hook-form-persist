@@ -87,5 +87,13 @@
     "typescript-eslint": "^8.72.0",
     "vitest": "^5.0.5",
     "zod": "^3.25.76"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SergGrey1992/react-hook-form-persist.git"
+  },
+  "homepage": "https://github.com/SergGrey1992/react-hook-form-persist#readme",
+  "bugs": {
+    "url": "https://github.com/SergGrey1992/react-hook-form-persist/issues"
   }
 }
