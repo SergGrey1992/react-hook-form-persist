@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 const pkg = JSON.parse(await readFile('package.json', 'utf8'));
 for (const [name, entry] of Object.entries(pkg.exports)) {
   await access(entry.import); await access(entry.types);
+  assert.doesNotMatch(await readFile(entry.types, 'utf8'), /^['"]use client['"]/u, `${name}: runtime directive in declarations`);
   assert.match(await readFile(entry.import, 'utf8'), /^['"]use client['"]/u, `${name}: missing use client`);
 }
 const [archive] = JSON.parse(execFileSync('npm', ['pack', '--dry-run', '--ignore-scripts', '--json'], { encoding: 'utf8' }));

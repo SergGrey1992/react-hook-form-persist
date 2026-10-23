@@ -48,3 +48,9 @@ it('adapter replacement ignores a late result from the old adapter', async () =>
   await act(async () => { read.resolve(draft('first')); await read.promise; });
   expect(result.current.form.getValues('name')).toBe('second');
 });
+it('removes malformed JSON rather than keeping a permanently unreadable draft', async () => {
+  localStorage.setItem('bad-json', '{broken');
+  const { result } = renderHook(() => { const form = useForm({ defaultValues: { name: '' } }); return local({ form, key: 'bad-json' }); });
+  await waitFor(() => expect(result.current.isRestored).toBe(true));
+  expect(localStorage.getItem('bad-json')).toBeNull(); expect(result.current.status).toBe('ready');
+});

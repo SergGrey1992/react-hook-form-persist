@@ -42,3 +42,21 @@ it.each([null, [], {}, { version: '1', updatedAt: 1, values: {} }, { version: 1,
 it('accepts an envelope without claiming to validate the application schema', () => {
   expect(isDraftEnvelope({ version: 1, updatedAt: 1, values: { arbitrary: true } })).toBe(true);
 });
+it('retries opening IndexedDB after an access failure', async () => {
+  const store = createIndexedDBAdapter({ databaseName: crypto.randomUUID() });
+  const original = indexedDB.open;
+  indexedDB.open = () => { throw new Error('denied'); };
+  try { await expect(store.get('key')).rejects.toThrow('denied'); } finally { indexedDB.open = original; }
+  await store.set('key', { values: {}, version: 1, updatedAt: 1 });
+  expect(await store.get('key')).toMatchObject({ values: {} });
+});
+it('reuses its IndexedDB connection and rejects uncloneable writes', async () => {
+  const store = createIndexedDBAdapter({ databaseName: crypto.randomUUID() });
+  const original = indexedDB.open.bind(indexedDB); let calls = 0;
+  indexedDB.open = (...args) => { calls++; return original(...args); };
+  try {
+    await store.get('key'); await store.get('other');
+    expect(calls).toBe(1);
+    await expect(store.set('bad', { version: 1, updatedAt: 1, values: { fn: () => {} } })).rejects.toThrow();
+  } finally { indexedDB.open = original; }
+});

@@ -6,5 +6,5 @@ export default defineConfig({
   deps: { neverBundle: ['react', 'react/jsx-runtime', 'react-hook-form', 'idb'] },
   // Every emitted JS chunk receives the client directive via banner.
   suppressWarnings: [/module level directive/],
-  banner: '"use client";',
+  banner: { js: '"use client";' },
 });

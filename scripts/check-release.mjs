@@ -1,0 +1,11 @@
+import { readFileSync } from 'node:fs';
+import assert from 'node:assert/strict';
+const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
+const version = process.argv[2];
+assert(!pkg.name.includes('your-scope'), 'Replace placeholder package name before publishing');
+assert(/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/u.test(version ?? ''), 'Release version must be stable SemVer (major.minor.patch)');
+assert.equal(pkg.version, version, 'Release version must match package.json version');
+assert(pkg.repository?.url && pkg.homepage && pkg.bugs?.url, 'Set actual repository, homepage and bugs URLs');
+const changelog = readFileSync('CHANGELOG.md', 'utf8');
+assert(changelog.split('\n').some(line => line.trim() === `## ${version}`), 'CHANGELOG must contain release notes for this version');
+console.log(`Ready to release ${pkg.name}@${version}; no publication performed by this check.`);

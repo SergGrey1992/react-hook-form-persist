@@ -31,3 +31,10 @@ it('does not pollute prototypes', () => {
   expect(filterValues(hostile, ['__proto__.polluted'], false)).toEqual({});
   expect(Object.prototype).not.toHaveProperty('polluted');
 });
+it('filters sensitive properties of objects nested in Map and Set', () => {
+  const value = { map: new Map([['user', { password: 'hidden', name: 'Anna' }]]), set: new Set([{ token: 'hidden', name: 'Anna' }]) };
+  expect(filterValues(value, [], false)).toEqual({ map: new Map([['user', { name: 'Anna' }]]), set: new Set([{ name: 'Anna' }]) });
+});
+it('excludes uncloneable values before taking a structured snapshot', () => {
+  expect(filterValues({ name: 'safe', ignored: () => {} }, ['ignored'], false)).toEqual({ name: 'safe' });
+});

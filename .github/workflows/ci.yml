@@ -1,0 +1,43 @@
+name: CI
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        react: ['18', '19']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Select React compatibility target
+        run: npm install --no-save --package-lock=false react@${REACT_VERSION} react-dom@${REACT_VERSION} @types/react@${REACT_VERSION} @types/react-dom@${REACT_VERSION}
+        env:
+          REACT_VERSION: ${{ matrix.react }}
+      - run: npm run check
+      - run: npm run test:consumer
+        env:
+          CONSUMER_REACT: ${{ matrix.react }}
+  examples:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm run prepare:examples
+      - run: npm ci && npm run build
+        working-directory: examples/react-vite
+      - run: npm ci && npm run build
+        working-directory: examples/nextjs
+        env:
+          NEXT_TELEMETRY_DISABLED: '1'

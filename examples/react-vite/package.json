@@ -1,0 +1,25 @@
+{
+  "name": "persist-form-vite-example",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@your-scope/react-hook-form-persist": "file:../../your-scope-react-hook-form-persist-0.1.0.tgz",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-hook-form": "^7.55.0",
+    "@hookform/resolvers": "^5.0.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "vite": "^8.0.0",
+    "typescript": "^6.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0"
+  }
+}

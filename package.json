@@ -51,7 +51,8 @@
     "validate:package": "node scripts/validate-package.mjs",
     "test:consumer": "node scripts/test-consumer.mjs",
     "check": "npm run typecheck && npm run lint && npm test && npm run build && npm run validate:package",
-    "prepack": "npm run build"
+    "prepack": "npm run build",
+    "prepare:examples": "npm run build && node scripts/prepare-examples.mjs"
   },
   "dependencies": {
     "idb": "^8.0.3"

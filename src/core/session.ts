@@ -1,7 +1,8 @@
 import type { PersistAdapter, PersistState } from './types';
+import { InvalidDraftError } from './errors';
 import { enqueue } from './queue';
 import { isDraftEnvelope } from './validation';
-import { filterValues, restoreValues, snapshotValues, valuesEqual } from './values';
+import { filterValues, restoreValues, valuesEqual } from './values';
 
 interface SessionOptions<T extends Record<string, unknown>> {
   adapter: PersistAdapter; key: string; debounce: number; maxAge: number; version: number;
@@ -23,6 +24,7 @@ export function createSession<T extends Record<string, unknown>>(options: Sessio
   let lastWrite: Promise<void> = Promise.resolve();
   let state: PersistState = { status: 'loading', isRestored: false, hasDraft: false, lastSavedAt: null };
   let operations = 0;
+  let clearBaseline: T | undefined;
   function update(patch: Partial<PersistState>) {
     state = { ...state, ...patch };
     // subscribe callbacks must not synchronously dispatch React state updates.
@@ -69,15 +71,16 @@ export function createSession<T extends Record<string, unknown>>(options: Sessio
     void lastWrite.catch(() => {});
     return lastWrite;
   }
+  const comparableValues = () => filterValues(options.getValues(), options.exclude, options.persistSensitiveFields);
   const initialized = (async () => {
     const generation = epoch;
     let baseline: T | undefined;
     let changed = false;
     try {
-      baseline = snapshotValues(options.getValues());
+      baseline = comparableValues();
       const draft: unknown = await enqueue(adapter, key, () => active ? adapter.get<unknown>(key) : Promise.resolve(null));
       if (!active || generation !== epoch) return;
-      changed = !valuesEqual(baseline, options.getValues());
+      changed = !valuesEqual(baseline, comparableValues());
       if (draft !== null) {
         if (!isDraftEnvelope(draft) || draft.version !== options.version || Date.now() - draft.updatedAt > options.maxAge) {
           await enqueue(adapter, key, async () => { if (active && generation === epoch) await adapter.remove(key); });
@@ -90,12 +93,24 @@ export function createSession<T extends Record<string, unknown>>(options: Sessio
         }
       }
       update({ status: 'ready' });
-    } catch { if (active && generation === epoch) update({ status: 'error' }); }
+    } catch (error) {
+      if (active && generation === epoch) {
+        if (error instanceof InvalidDraftError) {
+          try {
+            await enqueue(adapter, key, async () => { if (active && generation === epoch) await adapter.remove(key); });
+            if (active && generation === epoch) update({ status: 'ready' });
+          } catch { if (active && generation === epoch) update({ status: 'error' }); }
+        } else update({ status: 'error' });
+      }
+    }
     finally {
       if (active) {
-        unsubscribe = options.subscribe(schedule);
+        try {
+          unsubscribe = options.subscribe(schedule);
+          if (generation !== epoch && clearBaseline !== undefined && !valuesEqual(clearBaseline, comparableValues())) schedule(options.getValues());
+          else if (generation === epoch && (changed || (baseline !== undefined && !valuesEqual(baseline, comparableValues()) && !state.hasDraft))) schedule(options.getValues());
+        } catch (cause) { snapshotError = { cause }; update({ status: 'error' }); }
         update({ isRestored: true });
-        if (generation === epoch && (changed || (baseline !== undefined && !valuesEqual(baseline, options.getValues()) && !state.hasDraft))) schedule(options.getValues());
       }
     }
   })();
@@ -104,6 +119,7 @@ export function createSession<T extends Record<string, unknown>>(options: Sessio
     async clearDraft() {
       if (!active) return;
       const generation = ++epoch;
+      try { clearBaseline = comparableValues(); } catch { clearBaseline = undefined; }
       pending = undefined; snapshotError = undefined; cancelTimer();
       // Reset a previous write error so an empty post-clear flush is a no-op.
       lastWrite = Promise.resolve();

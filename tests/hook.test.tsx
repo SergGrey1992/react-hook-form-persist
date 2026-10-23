@@ -162,3 +162,78 @@ it('does not mark invalidation successful when removal fails', async () => {
   const { result } = mount(adapter);
   await waitFor(() => expect(result.current.persist.isRestored).toBe(true)); expect(result.current.persist.status).toBe('error');
 });
+it('persists edits after clear while initial reading is still pending', async () => {
+  const { adapter, data } = memoryAdapter(); const read = deferred<FormDraft<Values> | null>();
+  vi.spyOn(adapter, 'get').mockReturnValue(read.promise); const { result } = mount(adapter);
+  let clearing!: Promise<void>; act(() => { clearing = result.current.persist.clearDraft(); });
+  act(() => result.current.form.setValue('name', 'after clear'));
+  await act(async () => { read.resolve(draft()); await clearing; await result.current.persist.flush(); });
+  expect(data.get('key')).toMatchObject({ values: { name: 'after clear' } });
+});
+it('does not allow a late key read to restore over a new key', async () => {
+  const { adapter, data } = memoryAdapter(); const old = deferred<FormDraft<Values> | null>();
+  data.set('new', draft('new')); vi.spyOn(adapter, 'get').mockImplementationOnce(() => old.promise);
+  const { result, rerender } = mount(adapter, { key: 'old' });
+  await act(async () => { await Promise.resolve(); });
+  rerender({ key: 'new' }); await waitFor(() => expect(result.current.form.getValues('name')).toBe('new'));
+  await act(async () => { old.resolve(draft('old')); await old.promise; });
+  expect(result.current.form.getValues('name')).toBe('new');
+});
+it('new mount reads after an old active write finishes', async () => {
+  const { adapter } = memoryAdapter(); const gate = deferred<void>(); const original = adapter.set;
+  vi.spyOn(adapter, 'set').mockImplementation(async (key, value) => { await gate.promise; await original(key, value); });
+  const first = mount(adapter); await waitFor(() => expect(first.result.current.persist.isRestored).toBe(true));
+  act(() => first.result.current.form.setValue('name', 'latest'));
+  let write!: Promise<void>; act(() => { write = first.result.current.persist.flush(); });
+  await act(async () => { await Promise.resolve(); }); first.unmount();
+  const second = mount(adapter);
+  await act(async () => { gate.resolve(); await write; });
+  await waitFor(() => expect(second.result.current.persist.isRestored).toBe(true));
+  expect(second.result.current.form.getValues('name')).toBe('latest');
+});
+it('nested exclude preserves the current field but saves siblings', async () => {
+  const { adapter, data } = memoryAdapter(); data.set('nested', { version: 1, updatedAt: Date.now(), values: { profile: { public: 'saved', private: 'old' } } });
+  const wrapper = ({ children }: PropsWithChildren) => <PersistFormProvider adapter={adapter}>{children}</PersistFormProvider>;
+  const { result } = renderHook(() => { const form = useForm({ defaultValues: { profile: { public: '', private: 'mine' } } }); return { form, persist: usePersistForm({ form, key: 'nested', exclude: ['profile.private'] }) }; }, { wrapper });
+  await waitFor(() => expect(result.current.persist.isRestored).toBe(true));
+  expect(result.current.form.getValues('profile')).toEqual({ public: 'saved', private: 'mine' });
+  act(() => result.current.form.setValue('profile.public', 'updated'));
+  await act(() => result.current.persist.flush());
+  expect(data.get('nested')).toMatchObject({ values: { profile: { public: 'updated' } } });
+  expect(data.get('nested')).not.toHaveProperty('values.profile.private');
+});
+it('waits for controlled enabling after async defaults', async () => {
+  const { adapter, data } = memoryAdapter(); const defaultsReady = deferred<Values>(); data.set('async', draft('stored'));
+  const get = vi.spyOn(adapter, 'get');
+  const wrapper = ({ children }: PropsWithChildren) => <PersistFormProvider adapter={adapter}>{children}</PersistFormProvider>;
+  const { result } = renderHook(() => { const form = useForm<Values>({ defaultValues: () => defaultsReady.promise }); return { form, persist: usePersistForm({ form, key: 'async', enabled: !form.formState.isLoading }) }; }, { wrapper });
+  expect(get).not.toHaveBeenCalled();
+  await act(async () => { defaultsReady.resolve({ ...defaults, name: 'server' }); await defaultsReady.promise; });
+  await waitFor(() => expect(result.current.persist.isRestored).toBe(true)); expect(result.current.form.getValues('name')).toBe('stored');
+});
+it('does not keep a subscription after unmount', async () => {
+  const { adapter, data } = memoryAdapter(); const { result, unmount } = mount(adapter);
+  await waitFor(() => expect(result.current.persist.isRestored).toBe(true));
+  const form = result.current.form; unmount(); vi.useFakeTimers();
+  act(() => form.setValue('name', 'after unmount')); await vi.runAllTimersAsync(); expect(data.size).toBe(0);
+});
+it('restores and saves while excluded defaults contain uncloneable values', async () => {
+  const { adapter, data } = memoryAdapter(); data.set('excluded-function', { version: 1, updatedAt: Date.now(), values: { name: 'saved' } });
+  const callback = () => {};
+  const wrapper = ({ children }: PropsWithChildren) => <PersistFormProvider adapter={adapter}>{children}</PersistFormProvider>;
+  const { result } = renderHook(() => { const form = useForm({ defaultValues: { name: '', callback } }); return { form, persist: usePersistForm({ form, key: 'excluded-function', exclude: ['callback'] }) }; }, { wrapper });
+  await waitFor(() => expect(result.current.persist.isRestored).toBe(true));
+  expect(result.current.form.getValues('name')).toBe('saved'); expect(result.current.form.getValues('callback')).toBe(callback);
+  act(() => result.current.form.setValue('name', 'updated')); await act(() => result.current.persist.flush());
+  expect(data.get('excluded-function')).toMatchObject({ values: { name: 'updated' } });
+  expect(data.get('excluded-function')).not.toHaveProperty('values.callback');
+});
+it('handles an uncloneable edit arriving during initial read without an unhandled rejection', async () => {
+  const { adapter } = memoryAdapter(); const read = deferred<FormDraft<unknown> | null>(); vi.spyOn(adapter, 'get').mockReturnValue(read.promise);
+  const wrapper = ({ children }: PropsWithChildren) => <PersistFormProvider adapter={adapter}>{children}</PersistFormProvider>;
+  const { result } = renderHook(() => { const form = useForm<{ value: unknown }>({ defaultValues: { value: '' } }); return { form, persist: usePersistForm({ form, key: 'pending-clone-error' }) }; }, { wrapper });
+  act(() => result.current.form.setValue('value', () => {}));
+  await act(async () => { read.resolve(null); await read.promise; });
+  await waitFor(() => expect(result.current.persist.status).toBe('error'));
+  expect(result.current.persist.isRestored).toBe(true);
+});
