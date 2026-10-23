@@ -1,5 +1,5 @@
 {
-  "name": "@your-scope/react-hook-form-persist",
+  "name": "@serggrey1992/react-hook-form-persist",
   "version": "0.1.0",
   "description": "Type-safe React Hook Form drafts with pluggable asynchronous storage",
   "type": "module",

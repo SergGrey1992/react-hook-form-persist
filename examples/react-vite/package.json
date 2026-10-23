@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@your-scope/react-hook-form-persist": "file:../../your-scope-react-hook-form-persist-0.1.0.tgz",
+    "@serggrey1992/react-hook-form-persist": "file:../../serggrey1992-react-hook-form-persist-0.1.0.tgz",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.55.0",

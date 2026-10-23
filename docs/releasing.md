@@ -4,8 +4,8 @@
 
 ## Первоначальная настройка владельцем
 
-1. Выберите доступное реальное npm-имя, замените временное имя в package.json, lockfiles, импортах примеров и документации. Добавьте реальные repository/homepage/bugs. Поле author добавляйте только с разрешёнными реальными данными.
-2. Создайте публичный GitHub-репозиторий и отправьте код самостоятельно, когда будете готовы. Ни репозиторий, ни публикация автоматически в ходе разработки не создаются.
+1. Имя пакета настроено как `@serggrey1992/react-hook-form-persist`. Подтвердите владение личным npm-аккаунтом `serggrey1992`: GitHub и npm — отдельные сервисы. Если ваш npm username отличается, замените scope во всех импортах, manifests и lockfiles. Реальные repository/homepage/bugs уже заполнены. Поле author добавляйте только с разрешёнными реальными данными.
+2. Исходники размещены в личном репозитории [SergGrey1992/react-hook-form-persist](https://github.com/SergGrey1992/react-hook-form-persist), основная ветка `main`.
 3. Настройте владельца/организацию npm и доступ к scope. Если настройки Trusted Publisher недоступны до первой версии, первоначальную публикацию выполняет владелец интерактивно с 2FA. Не добавляйте долгоживущий npm-токен в этот workflow.
 4. В настройках npm-пакета добавьте GitHub Trusted Publisher: реальный owner/repository, имя файла `release.yml`, environment `npm`. Данные должны точно совпадать с workflow.
 5. В GitHub создайте environment `npm`, ограничьте его default branch и включите нужные правила подтверждения релизов. Workflow имеет `id-token: write` для OIDC и `contents: write` для GitHub Release.

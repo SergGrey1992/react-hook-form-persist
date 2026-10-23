@@ -2,7 +2,7 @@
 
 Самостоятельная TypeScript-библиотека автоматического сохранения черновиков React Hook Form. Один хук, асинхронные адаптеры, debounce, TTL, версии и исключение полей. React 18/19, React Hook Form 7.55–7.x, SSR. ESM; CommonJS не поставляется.
 
-**Статус:** версия 0.1.0 подготовлена локально. `@your-scope/react-hook-form-persist` — временное имя, пакет ещё не опубликован. Это не команда установки существующего публичного пакета.
+**Статус:** версия 0.1.0, исходники доступны в [личном GitHub-репозитории](https://github.com/SergGrey1992/react-hook-form-persist). Имя пакета — `@serggrey1992/react-hook-form-persist`; пакет ещё не опубликован. Перед публикацией нужно подтвердить владение одноимённым npm-аккаунтом.
 
 ## Установка
 
@@ -13,17 +13,17 @@ npm ci
 npm run check
 npm pack
 # В другом React-проекте:
-npm install /absolute/path/your-scope-react-hook-form-persist-0.1.0.tgz
+npm install /absolute/path/serggrey1992-react-hook-form-persist-0.1.0.tgz
 # Аналогично: pnpm add /absolute/path/package.tgz или yarn add /absolute/path/package.tgz
 ```
 
-После выбора имени и публикации: `npm install <реальное-имя> react-hook-form`. React и React Hook Form — peer dependencies. Для разработки/сборки требуется Node.js 22.18+; клиентский код использует ES2022 и `structuredClone` (современные браузеры).
+После публикации: `npm install @serggrey1992/react-hook-form-persist react-hook-form`. React и React Hook Form — peer dependencies. Для разработки/сборки требуется Node.js 22.18+; клиентский код использует ES2022 и `structuredClone` (современные браузеры).
 
 ## Быстрый старт
 
 ```tsx
 import { useForm } from 'react-hook-form';
-import { usePersistForm } from '@your-scope/react-hook-form-persist';
+import { usePersistForm } from '@serggrey1992/react-hook-form-persist';
 
 type Application = { name: string; email: string };
 
@@ -64,7 +64,7 @@ export function ApplicationForm() {
 | `/custom` | понятная ошибка | ближайший Provider | произвольный |
 
 ```tsx
-import { usePersistForm } from '@your-scope/react-hook-form-persist/local';
+import { usePersistForm } from '@serggrey1992/react-hook-form-persist/local';
 // или /session, /indexed
 ```
 
@@ -103,8 +103,8 @@ const { status, isRestored, hasDraft, lastSavedAt, clearDraft, flush } = usePers
 ## Provider и свой адаптер
 
 ```tsx
-import { PersistFormProvider } from '@your-scope/react-hook-form-persist/custom';
-import type { FormDraft, PersistAdapter } from '@your-scope/react-hook-form-persist/custom';
+import { PersistFormProvider } from '@serggrey1992/react-hook-form-persist/custom';
+import type { FormDraft, PersistAdapter } from '@serggrey1992/react-hook-form-persist/custom';
 
 export const apiAdapter: PersistAdapter = {
   async get<T>(key: string): Promise<FormDraft<T> | null> {

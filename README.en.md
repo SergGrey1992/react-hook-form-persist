@@ -2,11 +2,11 @@
 
 Independent ESM TypeScript package for React 18/19 and React Hook Form >=7.55 <8. Automatic draft restoration and debounced persistence, TTL/version checks, nested field exclusion, SSR-safe imports and pluggable asynchronous storage.
 
-The name `@your-scope/react-hook-form-persist` is a placeholder. This package has not been published. Build with `npm ci && npm run check && npm pack`, then install the resulting tarball in your app. Node >=22.18 is required for development; browsers need ES2022 and structuredClone.
+The package name is `@serggrey1992/react-hook-form-persist`, under a personal scope matching the GitHub username. Source: [SergGrey1992/react-hook-form-persist](https://github.com/SergGrey1992/react-hook-form-persist). This package has not been published; ownership of the matching npm account must be verified before publishing. Build with `npm ci && npm run check && npm pack`, then install the resulting tarball in your app. Node >=22.18 is required for development; browsers need ES2022 and structuredClone.
 
 ```tsx
 import { useForm } from 'react-hook-form';
-import { usePersistForm } from '@your-scope/react-hook-form-persist';
+import { usePersistForm } from '@serggrey1992/react-hook-form-persist';
 
 function Form() {
   const form = useForm({ defaultValues: { name: '' } });

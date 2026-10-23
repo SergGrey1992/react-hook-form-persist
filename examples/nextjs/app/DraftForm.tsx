@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { usePersistForm } from '@your-scope/react-hook-form-persist';
+import { usePersistForm } from '@serggrey1992/react-hook-form-persist';
 
 const schema = z.object({
   name: z.string().min(1, 'Введите имя'),
