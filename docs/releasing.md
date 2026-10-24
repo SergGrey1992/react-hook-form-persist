@@ -4,9 +4,9 @@
 
 ## Первоначальная настройка владельцем
 
-1. Имя пакета настроено как `@serggrey1992/react-hook-form-persist`. Подтвердите владение личным npm-аккаунтом `serggrey1992`: GitHub и npm — отдельные сервисы. Если ваш npm username отличается, замените scope во всех импортах, manifests и lockfiles. Реальные repository/homepage/bugs уже заполнены. Поле author добавляйте только с разрешёнными реальными данными.
+1. Имя пакета настроено как `@serggrey1992/react-hook-form-persist` в личном npm-аккаунте `serggrey1992`. Владелец подтвердил username; данные author, repository, homepage и bugs заполнены.
 2. Исходники размещены в личном репозитории [SergGrey1992/react-hook-form-persist](https://github.com/SergGrey1992/react-hook-form-persist), основная ветка `main`.
-3. Настройте владельца/организацию npm и доступ к scope. Если настройки Trusted Publisher недоступны до первой версии, первоначальную публикацию выполняет владелец интерактивно с 2FA. Не добавляйте долгоживущий npm-токен в этот workflow.
+3. Авторизуйтесь в личном npm-аккаунте `serggrey1992` и проверьте доступ к scope. Если настройки Trusted Publisher недоступны до первой версии, первоначальную публикацию выполняет владелец интерактивно с 2FA. Не добавляйте долгоживущий npm-токен в этот workflow.
 4. В настройках npm-пакета добавьте GitHub Trusted Publisher: реальный owner/repository, имя файла `release.yml`, environment `npm`. Данные должны точно совпадать с workflow.
 5. В GitHub создайте environment `npm`, ограничьте его default branch и включите нужные правила подтверждения релизов. Workflow имеет `id-token: write` для OIDC и `contents: write` для GitHub Release.
 6. Проверьте public visibility репозитория/пакета для provenance. В workflow используется Node 24 и npm 11; минимальные требования npm Trusted Publishing — npm 11.5.1 и Node 22.14.0. [Официальная документация](https://docs.npmjs.com/trusted-publishers/).

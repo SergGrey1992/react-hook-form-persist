@@ -4,6 +4,11 @@
   "description": "Type-safe React Hook Form drafts with pluggable asynchronous storage",
   "type": "module",
   "license": "MIT",
+  "author": {
+    "name": "Sergey Grey",
+    "email": "sergdiag19@gmail.com",
+    "url": "https://github.com/SergGrey1992"
+  },
   "keywords": [
     "react",
     "react-hook-form",

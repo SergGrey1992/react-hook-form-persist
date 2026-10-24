@@ -2,7 +2,7 @@
 
 Самостоятельная TypeScript-библиотека автоматического сохранения черновиков React Hook Form. Один хук, асинхронные адаптеры, debounce, TTL, версии и исключение полей. React 18/19, React Hook Form 7.55–7.x, SSR. ESM; CommonJS не поставляется.
 
-**Статус:** версия 0.1.0, исходники доступны в [личном GitHub-репозитории](https://github.com/SergGrey1992/react-hook-form-persist). Имя пакета — `@serggrey1992/react-hook-form-persist`; пакет ещё не опубликован. Перед публикацией нужно подтвердить владение одноимённым npm-аккаунтом.
+**Статус:** версия 0.1.0, исходники доступны в [личном GitHub-репозитории](https://github.com/SergGrey1992/react-hook-form-persist). Имя пакета — `@serggrey1992/react-hook-form-persist`; пакет ещё не опубликован.
 
 ## Установка
 
